@@ -9,15 +9,24 @@ The [gh-pages branch](https://github.com/data-8/tables-notebooks/tree/gh-pages) 
 
 ## Notebooks
 
-* blank.ipynb - blank notebook that is a usefuyl starting point for creating your own. [UCB interact](http://datahub.berkeley.edu/user/culler/interact?repo=tables-notebooks&path=blank.html)
+* blank.ipynb - blank notebook that is a usefuyl starting point for creating your own. 
+[UCB interact](http://datahub.berkeley.edu/user/culler/interact?repo=tables-notebooks&path=blank.ipynb)
 * RollingDice.ipynb - illustration of basic probability theory with rolling dice in Tables     
+[UCB interact](http://datahub.berkeley.edu/user/culler/interact?repo=tables-notebooks&path=RollingDice.ipynb)
 * ProbabilityBirthdaySurprise.ipynb - more involved illustration of probability theory where sequences are useful
+[UCB interact](http://datahub.berkeley.edu/user/culler/interact?repo=tables-notebooks&path=ProbabilityBirthdaySurprise.ipynb)
 * Census.ipynb - access and draw interesting insights easily from census data
+[UCB interact](http://datahub.berkeley.edu/user/culler/interact?repo=tables-notebooks&path=Census.ipynb)
 * BirthweightRegression.ipynb - regression and inference on simple smoking and birthweight data set
+[UCB interact](http://datahub.berkeley.edu/user/culler/interact?repo=tables-notebooks&path=BirthweightRegression.ipynb)
 * Clicks.ipynb - analyss of clickstream data as per Doing Data Science
-* BerkeleySalary.ipynb - large complex analysis of open data from the city of Berkeley           
-* HealthSample.ipynb - realistic analysis of health survey data              
+[UCB interact](http://datahub.berkeley.edu/user/culler/interact?repo=tables-notebooks&path=Clicks.ipynb)
+* BerkeleySalary.ipynb - large complex analysis of open data from the city of Berkeley
+[UCB interact](http://datahub.berkeley.edu/user/culler/interact?repo=tables-notebooks&path=BerkeleySalary.ipynb)
+* HealthSample.ipynb - realistic analysis of health survey data
+[UCB interact](http://datahub.berkeley.edu/user/culler/interact?repo=tables-notebooks&path=HealthSample.ipynb)
 * UCB_study.ipynb - organizational analysis of teaching and resources in a public university
+[UCB interact](http://datahub.berkeley.edu/user/culler/interact?repo=tables-notebooks&path=UCB_study.ipynb)
 
 ## Temporary trial
 
