@@ -9,7 +9,7 @@ The [gh-pages branch](https://github.com/data-8/tables-notebooks/tree/gh-pages) 
 
 ## Notebooks
 
-* blank.ipynb - blank notebook that is a usefuyl starting point for creating your own
+* blank.ipynb - blank notebook that is a usefuyl starting point for creating your own. [UCB interact](http://datahub.berkeley.edu/user/culler/interact?repo=tables-notebooks&path=blank.html)
 * RollingDice.ipynb - illustration of basic probability theory with rolling dice in Tables     
 * ProbabilityBirthdaySurprise.ipynb - more involved illustration of probability theory where sequences are useful
 * Census.ipynb - access and draw interesting insights easily from census data
