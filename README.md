@@ -9,7 +9,7 @@ The [gh-pages branch](https://github.com/data-8/tables-notebooks/tree/gh-pages) 
 
 ## Notebooks
 
-* blank.ipynb - blank notebook that is a usefuyl starting point for creating your own [UCB interact](http://datahub.berkeley.edu/user-redirect/interact?repo=tables-notebooks&branch=gh-pages&path=blank.ipynb) [External Usage] (http://try.datahub.berkeley.edu/user-redirect/interact?repo=tables-notebooks&branch=gh-pages&path=blank.ipynb)
+* blank.ipynb - blank notebook that is a usefuyl starting point for creating your own [UCB interact](http://datahub.berkeley.edu/user-redirect/interact?repo=tables-notebooks&branch=gh-pages&path=blank.ipynb) [External Usage](http://try.datahub.berkeley.edu/user-redirect/interact?repo=tables-notebooks&branch=gh-pages&path=blank.ipynb)
 * RollingDice.ipynb - illustration of basic probability theory with rolling dice in Tables [UCB interact](http://datahub.berkeley.edu/user-redirect/interact?repo=tables-notebooks&branch=gh-pages&path=RollingDice.ipynb)
 * ProbabilityBirthdaySurprise.ipynb - more involved illustration of probability theory where sequences are useful [UCB interact](http://datahub.berkeley.edu/user-redirect/interact?repo=tables-notebooks&branch=gh-pages&path=ProbabilityBirthdaySurprise.ipynb)
 * Census.ipynb - access and draw interesting insights easily from census data [UCB interact](http://datahub.berkeley.edu/user-redirect/interact?repo=tables-notebooks&branch=gh-pages&path=Census.ipynb)
