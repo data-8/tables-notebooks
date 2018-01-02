@@ -1,8 +1,12 @@
 "use strict;"
-let hub = "try.datahub.berkeley.edu";
-let repo = "tables-notebooks";
+let hub = "mybinder.org";
+let repo = "data-8/tables-notebooks";
 let branch = "gh-pages";
+
 function makeHubLink(notebook) {
-    document.write(`<a href=http://${hub}/user-redirect/interact?repo=${repo}&branch=${branch}&path=${notebook}>${notebook}</a>`);
+    document.write(`<a href=https://${hub}/v2/gh/${repo}/${branch}?filepath=${notebook}>${notebook}</a>`);		   
 }
+
+
+
 
