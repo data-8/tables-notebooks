@@ -37,3 +37,6 @@ The trial hub [try.datahub.berkeley.edu](http://try.datahub.berkeley.edu) can al
 * UCB_study.ipynb - organizational analysis of teaching and resources in a public university 
 [ [UCB interact](http://datahub.berkeley.edu/user-redirect/interact?repo=tables-notebooks&branch=gh-pages&path=UCB_study.ipynb) ]
 [ [External Usage](http://try.datahub.berkeley.edu/user-redirect/interact?repo=tables-notebooks&branch=gh-pages&path=UCB_study.ipynb) ]
+* IPEDS_EECS_analysis.ipynb  -  NCES IPEDS Graduation Survey for EE and CS
+[ [UCB interact](http://datahub.berkeley.edu/user-redirect/interact?repo=tables-notebooks&branch=gh-pages&path=eecsdegrees/IPEDS_EECS_analysis.ipynb) ]
+[ [External Usage](http://try.datahub.berkeley.edu/user-redirect/interact?repo=tables-notebooks&branch=gh-pages&path=eecsdegrees/IPEDS_EECS_analysis.ipynb) ]
