@@ -1,6 +1,6 @@
 from datascience import Table
 import numpy as np
-from scipy.interpolate import UnivariateSpline
+from scipy.interpolate import UnivariateSpline, interp1d
 
 class TimeTable(Table):
     """Table with a designated column as a sequence of times in the first column."""
@@ -72,8 +72,22 @@ class TimeTable(Table):
     @property
     def categories(self):
         return [label for label in self.labels if label != self.time_column]
-    
+        
     # TimeTable methods utilizing time_column
+    
+    def snap(self, times, fcol=None):
+        """Snap TimeTable to points in times, interpolate 0 points in fcol, if specified."""
+        sttbl = TimeTable([self.time_column])
+        sttbl[self.time_column] = times
+        if fcol :
+            ftbl = self.where(fcol)
+        else :
+            ftbl = self.copy()
+        otimes = ftbl[self.time_column]
+        for col in ftbl.categories :
+            f = interp1d(otimes, ftbl[col], fill_value = 'extrapolate')
+            sttbl[col] = f(times)
+        return sttbl
 
     def order_cols(self):
         """Create a TimeTable with categories ordered by the values in last row."""

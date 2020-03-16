@@ -53,7 +53,6 @@ def loadfit(daytable, p_lo = None, p_hi = None):
     perr = np.sqrt(np.diag(pcov))
     return params, perr
 
-
 def hour(timestamp):
     h, m = locale.atof(timestamp[0:2]), locale.atof(timestamp[3:])
     return h + m/60
@@ -123,7 +122,7 @@ class View :
         timeseries = df.select(['time', 'value']).group('time', sum).relabel('value sum', units)
         timeseries['hour'] = timeseries.apply(hour, 'time')
         timeseries.move_to_start('hour')
-        return timeseries.drop('time'), metadata
+        return TimeTable.from_table(timeseries.drop('time'), 'hour'), metadata
     
     def getdays(self, start_day, end_day):
         q = {
@@ -146,7 +145,7 @@ class View :
         timeseries = df.select(['date', 'time', 'value', 'id']).pivot('date', 'time', 'value', sum)
         timeseries['hour'] = timeseries.apply(hour, 'time')
         timeseries.move_to_start('hour')
-        return timeseries.drop('time'), metadata
+        return TimeTable.from_table(timeseries.drop('time'), 'hour'), metadata
 
     def model_days(self, start, end):
         date = datetime.datetime.strptime(start,"%Y-%m-%d")
