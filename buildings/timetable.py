@@ -27,6 +27,18 @@ class TimeTable(Table):
     def read_table(self, *args, **kwargs):
         return self.from_table(Table.read_table(*args, **kwargs), self.time_column)
     
+    def with_column(self, *args, **kwargs):
+        return self.from_table(Table.with_column(*args, **kwargs), self.time_column)
+    
+    def with_columns(self, *args, **kwargs):
+        return self.from_table(Table().with_columns(*args, **kwargs), self.time_column)
+    
+    def with_row(self, *args, **kwargs):
+        return self.from_table(Table.with_row(*args, **kwargs), self.time_column)
+    
+    def with_rows(self, *args, **kwargs):
+        return self.from_table(Table.with_rows(*args, **kwargs), self.time_column)
+    
     def select(self, *args, **kwargs):
         return self._fix_(Table.select(self, *args, **kwargs))
 
