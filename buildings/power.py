@@ -153,6 +153,7 @@ class ModelView:
         enddate = datetime.datetime.strptime(day,"%Y-%m-%d")+datetime.timedelta(days=1)
         q = {
             "buildings": self.vsites,
+
             "classes": self.vclasses,
             "dates": [day],
              }
@@ -230,6 +231,7 @@ class View:
         timeseries = df.select(['time', 'value']).group('time', sum).relabel('value sum', units)
         timeseries['hour'] = timeseries.apply(hour, 'time')
         timeseries.move_to_start('hour')
+        return timeseries.drop('time'), metadata
 
     def getdays(self, start_day, end_day, cache='./data/'):
         q = {
