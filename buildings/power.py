@@ -5,6 +5,13 @@ import numpy as np
 import locale
 from datascience import Table
 from timetable import TimeTable
+from os import path
+
+def to_yday(date):
+    return datetime.datetime.strptime(date, "%Y-%m-%d").timetuple().tm_yday
+
+def to_day(year, yday):
+    return datetime.datetime.strftime(datetime.date(int(year),1,1) + datetime.timedelta(days=yday), "%Y-%m-%d")
 
 def high(vals):
     return np.percentile(vals, 95)
@@ -190,8 +197,8 @@ class View:
         self.vhost = host
         self.vsites = sites
         self.vclasses = classes
-
-    def getday(self, day):
+        
+    def getday(self, day, cache = "./data/"):
         enddate = datetime.datetime.strptime(day,"%Y-%m-%d")+datetime.timedelta(days=1)
         q = {
             "buildings": self.vsites,
@@ -200,10 +207,18 @@ class View:
             "start": day,
             "end": enddate.strftime("%Y-%m-%d")
              }
-        r = requests.post(self.vhost + '/data', json = q)
-        if (not r.ok):
-            raise Exception ('getday request', r.status_code)
-        df = Table.read_table(io.StringIO(r.text))
+        if (cache) :
+            dpath = cache + ("".join(self.vsites) + day + ".csv").replace(" ","_").replace("/","-")
+        if (cache and path.exists(dpath)) :
+            df = Table.read_table(dpath)
+        else: 
+            r = requests.post(self.vhost + '/data', json = q)
+            if (not r.ok):
+                raise Exception ('getday request', r.status_code)
+            df = Table.read_table(io.StringIO(r.text))
+            if (cache) :
+                df.to_csv(dpath)
+
         units = df['units'][0]
         metadata = {'units'    : units,
                     'semester' : df['semester'][0],
@@ -215,20 +230,28 @@ class View:
         timeseries = df.select(['time', 'value']).group('time', sum).relabel('value sum', units)
         timeseries['hour'] = timeseries.apply(hour, 'time')
         timeseries.move_to_start('hour')
-        return TimeTable.from_table(timeseries.drop('time'), 'hour'), metadata
 
-    def getdays(self, start_day, end_day):
+    def getdays(self, start_day, end_day, cache='./data/'):
         q = {
             "buildings": self.vsites,
             "classes": self.vclasses,
             "features": {},
             "start": start_day,
             "end": end_day
-             }
-        r = requests.post(self.vhost + '/data', json = q)
-        if (not r.ok):
-            raise Exception ('getday request', r.status_code)
-        df = Table.read_table(io.StringIO(r.text))
+            }
+             
+        if (cache) :
+            dpath = cache + ("".join(self.vsites) + start_day + ":" + end_day + ".csv").replace(" ","_").replace("/","-")
+        if (cache and path.exists(dpath)) :
+            df = Table.read_table(dpath)
+        else :
+            r = requests.post(self.vhost + '/data', json = q)
+            if (not r.ok):
+                raise Exception ('getday request', r.status_code)
+            df = Table.read_table(io.StringIO(r.text))
+            if (cache) :
+                df.to_csv(bpath)
+                
         units = df['units'][0]
         metadata = {'units'    : units,
                     'start'    : start_day,
@@ -243,23 +266,23 @@ class View:
     def model_days(self, start, end):
         date = datetime.datetime.strptime(start,"%Y-%m-%d")
         enddate = datetime.datetime.strptime(end,"%Y-%m-%d")
-        site_history = Table(['day', 'daytype', 'term', 'p_5', 'p_ave', 'p_95', 't1', 't2', 't3', 't4', 'p_lo', 'p_hi'])
+        site_history = Table(['day', 'yday',  'daytype', 'term', 'p_5', 'p_ave', 'p_95', 't1', 't2', 't3', 't4', 'p_lo', 'p_hi'])
         while date != enddate :
             day = datetime.datetime.strftime(date, "%Y-%m-%d")
+            yday = date.timetuple().tm_yday
             try :
                 ts, md = self.getday(day)
                 p_5 = np.percentile(ts['kW'], 5)
                 p_ave = np.mean(ts['kW'])
                 p_95 = np.percentile(ts['kW'], 95)
-                print(day, md['daytype'], p_5, p_ave, p_95)
+                #print(day, md['daytype'], p_5, p_ave, p_95)
                 params, perr = loadfit(ts, p_lo = p_5, p_hi = p_95)
-                row = (day, md['daytype'], md['semester'], p_5, p_ave, p_95, *params)
+                row = (day, yday, md['daytype'], md['semester'], p_5, p_ave, p_95, *params)
                 site_history.append(row)
             except :
                 print("failed to get", day)
             date =  date + datetime.timedelta(days=1)
-        return site_history
-
+        return TimeTable.from_table(site_history, 'yday')
 
 if __name__ == '__main__':
     ucb = CampusPower('https://campus-export.xbos.io')
