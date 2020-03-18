@@ -1,4 +1,5 @@
 import requests, io, datetime
+from dateutil.rrule import rrule, DAILY
 import scipy
 import numpy as np
 import locale
@@ -11,7 +12,7 @@ def low(vals):
     return np.percentile(vals, 5)
 
 def loadpt(h, t1, t2, t3, t4, p_lo, p_hi):
-    """ Pointwise model of trapezoidal load shape. 
+    """ Pointwise model of trapezoidal load shape.
     p_lo: 0-t1, Rise: t1-t2, p_hi: t2-t3, fall: t3-t4, p_lo: t4- for h in [0,24)
     """
     if h < 0 or h >= 24 :
@@ -20,7 +21,7 @@ def loadpt(h, t1, t2, t3, t4, p_lo, p_hi):
     t2 = min(max(t1, t2), 24)
     t3 = min(max(t2, t3), 24)
     t4 = max(t3, t4)
-    
+
     if t4-24 <= h and h < t1 :
         return p_lo
     elif t1 <= h and h < t2 :
@@ -47,8 +48,8 @@ def loadfit(daytable, p_lo = None, p_hi = None):
         p_lo = low(daytable['kW'])
     if p_hi is None :
         p_hi = high(daytable['kW'])
-    params, pcov = scipy.optimize.curve_fit(loadshape, daytable['hour'], daytable['kW'], 
-                                            [6,8,18,20, p_lo, p_hi], 
+    params, pcov = scipy.optimize.curve_fit(loadshape, daytable['hour'], daytable['kW'],
+                                            [6,8,18,20, p_lo, p_hi],
                                             bounds=((0,0,0,0,p_lo,p_lo), (24,24,24,24,p_hi,p_hi)))
     perr = np.sqrt(np.diag(pcov))
     return params, perr
@@ -57,24 +58,25 @@ def hour(timestamp):
     h, m = locale.atof(timestamp[0:2]), locale.atof(timestamp[3:])
     return h + m/60
 
+
 class CampusPower :
     """ Interface to Brick-based energy data for a collection of buildings. """
-    
+
     def __init__(self, host):
         self.host = host
-            
+
     def sites(self):
         r = requests.get(self.host + '/buildings')
         if (not r.ok):
             raise Exception ('Sites status', r.status_code)
         return r.json()
-    
+
     def classes(self):
         r = requests.get(self.host + '/classes')
         if (not r.ok):
             raise Exception ('Classes status', r.status_code)
         return r.json()
-    
+
     def view(self, sites, classes):
         if (isinstance(sites, str)) :
             sites = [sites]
@@ -90,15 +92,105 @@ class CampusPower :
                 raise Exception ('Bad class: ', cl)
         return View(self.host, sites, classes)
 
+    def metadata(self, sites, skip_empty=True):
+        """
+        Retrieves table of metadata for set of sites:
+            - assignable sq ft
+            - gross sq ft
+            - levels
+            - year (built?)
+        Missing properties are None if skip_empty is False, else
+        these are elided
+        """
+        recs = []
+        labels = ['assignable_sf', 'gross_sf', 'levels', 'year']
+        for site in sites:
+            # fetch additional metadata for the site
+            r = requests.get(self.host + '/building?name=' + site)
+            if (not r.ok):
+                raise Exception('building metadata request', r.status_code)
+            res = r.json()
+            rec = {}
+            for label in labels:
+                rec[label] = res.get(label)
+            if skip_empty and None in rec.values():
+                continue
+            rec['site'] = site
+            recs.append(rec)
+        tab = Table().from_records(recs)
+        return tab
 
-class View :
+    def model(self, sites, classes):
+        if (isinstance(sites, str)) :
+            sites = [sites]
+        if (isinstance(classes, str)) :
+            classes = [classes]
+        c = self.classes()
+        s = self.sites()
+        for site in sites:
+            if not site in s:
+                raise Exception ('Bad site: ', site)
+        for cl in classes:
+            if not cl in c:
+                raise Exception ('Bad class: ', cl)
+        return ModelView(self.host, sites, classes)
+
+
+class ModelView:
+    def __init__(self, host, sites, classes):
+        self.vhost = host
+        self.vsites = sites
+        self.vclasses = classes
+
+    def getday(self, day):
+        enddate = datetime.datetime.strptime(day,"%Y-%m-%d")+datetime.timedelta(days=1)
+        q = {
+            "buildings": self.vsites,
+            "classes": self.vclasses,
+            "dates": [day],
+             }
+        r = requests.post(self.vhost + '/model', json = q)
+        if (not r.ok):
+            raise Exception ('getday request', r.status_code)
+        df = Table.read_table(io.StringIO(r.text))
+        metadata = {'day'      : day,
+                    'sites'    : self.vsites,
+                    'classes'  : self.vclasses,
+                    }
+
+        ts = df.select(['site', 'class', 'date', 't1', 't2', 't3', 't4', 'p_lo', 'p_hi'])
+        return TimeTable.from_table(ts, 'date'), metadata
+
+    def getdays(self, start_day, end_day):
+        st = datetime.datetime.strptime(start_day,"%Y-%m-%d")
+        et = datetime.datetime.strptime(end_day,"%Y-%m-%d")
+        dates = rrule(DAILY, dtstart=st, until=et)
+        dates = list(map(str, dates))
+        q = {
+            "buildings": self.vsites,
+            "classes": self.vclasses,
+            "dates": dates,
+             }
+        r = requests.post(self.vhost + '/model', json = q)
+        if (not r.ok):
+            raise Exception ('getday request', r.status_code)
+        df = Table.read_table(io.StringIO(r.text))
+        metadata = {'start'    : start_day,
+                    'end'      : end_day,
+                    'sites'    : self.vsites,
+                    'classes'  : self.vclasses}
+        ts = df.select(['site', 'class', 'date', 't1', 't2', 't3', 't4', 'p_lo', 'p_hi'])
+        return TimeTable.from_table(ts, 'date'), metadata
+
+
+class View:
     """ Metadata view into a power historian"""
 
     def __init__(self, host, sites, classes):
         self.vhost = host
         self.vsites = sites
         self.vclasses = classes
-    
+
     def getday(self, day):
         enddate = datetime.datetime.strptime(day,"%Y-%m-%d")+datetime.timedelta(days=1)
         q = {
@@ -119,11 +211,12 @@ class View :
                     'day'      : day,
                     'sites'    : self.vsites,
                     'classes'  : self.vclasses}
+
         timeseries = df.select(['time', 'value']).group('time', sum).relabel('value sum', units)
         timeseries['hour'] = timeseries.apply(hour, 'time')
         timeseries.move_to_start('hour')
         return TimeTable.from_table(timeseries.drop('time'), 'hour'), metadata
-    
+
     def getdays(self, start_day, end_day):
         q = {
             "buildings": self.vsites,
@@ -166,3 +259,16 @@ class View :
                 print("failed to get", day)
             date =  date + datetime.timedelta(days=1)
         return site_history
+
+
+if __name__ == '__main__':
+    ucb = CampusPower('https://campus-export.xbos.io')
+
+    # building metadata
+    bm = ucb.metadata(['Soda Hall New (as of 1/12/12)'])
+    print(bm)
+
+    # model view
+    mv = ucb.model(['Soda Hall New (as of 1/12/12)'], ['Building_Power_Demand_Sensor'])
+    model, md = mv.getdays('2020-03-07', '2020-03-14')
+    print(model)
