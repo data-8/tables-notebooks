@@ -97,7 +97,12 @@ class TimeTable(Table):
             ftbl = self.copy()
         otimes = ftbl[self.time_column]
         for col in ftbl.categories :
-            f = interp1d(otimes, ftbl[col], fill_value = 'extrapolate')
+            # the interpolation function returned by 'interp1d' cannot use any NaN
+            # values. 'not_nan' contains the indexes of 'good' values; we use this
+            # to index into the X values (otimes) and Y values (ftbl[col]) so that
+            # interp1d only sees non-nan values
+            not_nan = np.where(np.isfinite(ftbl[col]))
+            f = interp1d(otimes[not_nan], ftbl[col][not_nan], fill_value = 'extrapolate')
             sttbl[col] = f(times)
         return sttbl
 
