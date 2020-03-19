@@ -160,13 +160,8 @@ class ModelView:
         if (not r.ok):
             raise Exception ('getday request', r.status_code)
         df = Table.read_table(io.StringIO(r.text))
-        metadata = {'day'      : day,
-                    'sites'    : self.vsites,
-                    'classes'  : self.vclasses,
-                    }
-
         ts = df.select(['site', 'class', 'date', 't1', 't2', 't3', 't4', 'p_lo', 'p_hi'])
-        return TimeTable.from_table(ts, 'date'), metadata
+        return TimeTable.from_table(ts, 'date')
 
     def getdays(self, start_day, end_day):
         st = datetime.datetime.strptime(start_day,"%Y-%m-%d")
@@ -182,12 +177,8 @@ class ModelView:
         if (not r.ok):
             raise Exception ('getday request', r.status_code)
         df = Table.read_table(io.StringIO(r.text))
-        metadata = {'start'    : start_day,
-                    'end'      : end_day,
-                    'sites'    : self.vsites,
-                    'classes'  : self.vclasses}
         ts = df.select(['site', 'class', 'date', 't1', 't2', 't3', 't4', 'p_lo', 'p_hi'])
-        return TimeTable.from_table(ts, 'date'), metadata
+        return TimeTable.from_table(ts, 'date')
 
 
 class View:
@@ -293,5 +284,5 @@ if __name__ == '__main__':
 
     # model view
     mv = ucb.model(['Soda Hall New (as of 1/12/12)'], ['Building_Power_Demand_Sensor'])
-    model, md = mv.getdays('2020-03-07', '2020-03-14')
+    model = mv.getdays('2020-03-07', '2020-03-14')
     print(model)
