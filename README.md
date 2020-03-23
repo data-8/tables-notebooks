@@ -40,3 +40,4 @@ The trial hub [try.datahub.berkeley.edu](http://try.datahub.berkeley.edu) can al
 * IPEDS_EECS_analysis.ipynb  -  NCES IPEDS Graduation Survey for EE and CS
 [ [UCB interact](http://datahub.berkeley.edu/user-redirect/interact?repo=tables-notebooks&branch=gh-pages&path=eecsdegrees/IPEDS_EECS_analysis.ipynb) ]
 [ [External Usage](http://try.datahub.berkeley.edu/user-redirect/interact?repo=tables-notebooks&branch=gh-pages&path=eecsdegrees/IPEDS_EECS_analysis.ipynb) ]
+[ Covid19 Data from JHU ](http://datahub.berkeley.edu/user-redirect/interact?repo=tables-notebooks&branch=gh-pages&path=covid19/Covid19.ipynb) ]
