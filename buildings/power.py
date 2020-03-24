@@ -193,7 +193,19 @@ class View:
         self.vhost = host
         self.vsites = sites
         self.vclasses = classes
-        
+
+    def aggregate(self, days):
+        """Returns [site, units, day, count, min, p5, median, mean, p95, max] for each day"""
+        q = {
+            'buildings': self.vsites,
+            'dates': days,
+        }
+        r = requests.post(self.vhost + '/aggregate', json = q)
+        if (not r.ok):
+            raise Exception ('aggdays request', r.reason)
+        df = Table.read_table(io.StringIO(r.text))
+        return TimeTable.from_table(df, 'day')
+
     def getday(self, day, cache = "./data/"):
         enddate = datetime.datetime.strptime(day,"%Y-%m-%d")+datetime.timedelta(days=1)
         q = {
