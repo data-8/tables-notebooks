@@ -13,6 +13,13 @@ def to_yday(date):
 def to_day(year, yday):
     return datetime.datetime.strftime(datetime.date(int(year),1,1) + datetime.timedelta(days=yday), "%Y-%m-%d")
 
+def day_range(start_day, end_day):
+    """Returns list of string-formatted YYYY-mm-dd dates between [start, end] (inclusive)"""
+    st = datetime.datetime.strptime(start_day,"%Y-%m-%d")
+    et = datetime.datetime.strptime(end_day,"%Y-%m-%d")
+    dates = rrule(DAILY, dtstart=st, until=et)
+    return list(map(lambda x: x.strftime('%Y-%m-%d'), dates))
+
 def high(vals):
     return np.percentile(vals, 95)
 def low(vals):
@@ -165,10 +172,7 @@ class ModelView:
         return TimeTable.from_table(ts, 'date')
 
     def getdays(self, start_day, end_day):
-        st = datetime.datetime.strptime(start_day,"%Y-%m-%d")
-        et = datetime.datetime.strptime(end_day,"%Y-%m-%d")
-        dates = rrule(DAILY, dtstart=st, until=et)
-        dates = list(map(str, dates))
+        dates = day_range(start_day, end_day)
         q = {
             "buildings": self.vsites,
             "classes": self.vclasses,
