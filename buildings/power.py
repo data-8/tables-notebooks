@@ -13,6 +13,13 @@ def to_yday(date):
 def to_day(year, yday):
     return datetime.datetime.strftime(datetime.date(int(year),1,1) + datetime.timedelta(days=yday), "%Y-%m-%d")
 
+def day_range(start_day, end_day):
+    """Returns list of string-formatted YYYY-mm-dd dates between [start, end] (inclusive)"""
+    st = datetime.datetime.strptime(start_day,"%Y-%m-%d")
+    et = datetime.datetime.strptime(end_day,"%Y-%m-%d")
+    dates = rrule(DAILY, dtstart=st, until=et)
+    return list(map(lambda x: x.strftime('%Y-%m-%d'), dates))
+
 def high(vals):
     return np.percentile(vals, 95)
 def low(vals):
@@ -165,10 +172,7 @@ class ModelView:
         return TimeTable.from_table(ts, 'date')
 
     def getdays(self, start_day, end_day):
-        st = datetime.datetime.strptime(start_day,"%Y-%m-%d")
-        et = datetime.datetime.strptime(end_day,"%Y-%m-%d")
-        dates = rrule(DAILY, dtstart=st, until=et)
-        dates = list(map(str, dates))
+        dates = day_range(start_day, end_day)
         q = {
             "buildings": self.vsites,
             "classes": self.vclasses,
@@ -189,7 +193,19 @@ class View:
         self.vhost = host
         self.vsites = sites
         self.vclasses = classes
-        
+
+    def aggregate(self, days):
+        """Returns [site, units, day, count, min, p5, median, mean, p95, max] for each day"""
+        q = {
+            'buildings': self.vsites,
+            'dates': days,
+        }
+        r = requests.post(self.vhost + '/aggregate', json = q)
+        if (not r.ok):
+            raise Exception ('aggdays request', r.reason)
+        df = Table.read_table(io.StringIO(r.text))
+        return TimeTable.from_table(df, 'day')
+
     def getday(self, day, cache = "./data/"):
         enddate = datetime.datetime.strptime(day,"%Y-%m-%d")+datetime.timedelta(days=1)
         q = {
@@ -203,7 +219,7 @@ class View:
             dpath = cache + ("".join(self.vsites) + day + ".csv").replace(" ","_").replace("/","-")
         if (cache and path.exists(dpath)) :
             df = Table.read_table(dpath)
-        else: 
+        else:
             r = requests.post(self.vhost + '/data', json = q)
             if (not r.ok):
                 raise Exception ('getday request', r.status_code)
@@ -232,7 +248,7 @@ class View:
             "start": start_day,
             "end": end_day
             }
-             
+
         if (cache) :
             dpath = cache + ("".join(self.vsites) + start_day + ":" + end_day + ".csv").replace(" ","_").replace("/","-")
         if (cache and path.exists(dpath)) :
@@ -244,7 +260,7 @@ class View:
             df = Table.read_table(io.StringIO(r.text))
             if (cache) :
                 df.to_csv(bpath)
-                
+
         units = df['units'][0]
         metadata = {'units'    : units,
                     'start'    : start_day,
