@@ -219,7 +219,7 @@ class View:
             dpath = cache + ("".join(self.vsites) + day + ".csv").replace(" ","_").replace("/","-")
         if (cache and path.exists(dpath)) :
             df = Table.read_table(dpath)
-        else: 
+        else:
             r = requests.post(self.vhost + '/data', json = q)
             if (not r.ok):
                 raise Exception ('getday request', r.status_code)
@@ -248,7 +248,7 @@ class View:
             "start": start_day,
             "end": end_day
             }
-             
+
         if (cache) :
             dpath = cache + ("".join(self.vsites) + start_day + ":" + end_day + ".csv").replace(" ","_").replace("/","-")
         if (cache and path.exists(dpath)) :
@@ -260,7 +260,7 @@ class View:
             df = Table.read_table(io.StringIO(r.text))
             if (cache) :
                 df.to_csv(bpath)
-                
+
         units = df['units'][0]
         metadata = {'units'    : units,
                     'start'    : start_day,
